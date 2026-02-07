@@ -11,9 +11,10 @@
  npm run dev
 
  Frontend will be available at `http://localhost:5173
-                                                                            -----########### Deploy on vercel#######----
 
-Deploy Frontend to Verce
+ ---------------------------------------------------------------------------------Deploy on vercel-----------------------------------------------------------------------------------------------------
+
+Deploy Frontend to Vercel
 
 1. Prepare Project:
    Ensure build works locally
