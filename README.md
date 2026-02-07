@@ -10,8 +10,8 @@
  Start development server
  npm run dev
 
- Frontend will be available at `http://localhost:5173`
-----------------------------------------------------------------------------------------deploy on vercel--------------------------------------------------------------------------------------------------
+ Frontend will be available at `http://localhost:5173
+                                                                            -----########### Deploy on vercel#######----
 
 Deploy Frontend to Verce
 
