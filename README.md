@@ -11,7 +11,7 @@ Start development server
 npm run dev
 
 Frontend will be available at `http://localhost:5173`
---------------------------------------------------------------------------------------#########################################################-------------------------------------------------------------------------
+--------------------------------------------------------------------------------------#########################################################----------------------------------------------------------------------
 
 Deploy Frontend to Vercel
 
@@ -32,7 +32,8 @@ Deploy Frontend to Vercel
 
 3. Deploy:
    
-   # Vercel auto-deploys on git push
+   Vercel auto-deploys on git push
    git push origin main
 
 Your frontend URL will be like: `https://your-app.vercel.app`
+
