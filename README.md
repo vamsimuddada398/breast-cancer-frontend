@@ -1,16 +1,16 @@
-Navigate to frontend directory
-cd frontend
+ Navigate to frontend directory
+ cd frontend
 
-Install dependencies
-npm install
+ Install dependencies
+ npm install
 
-Configure environment
-cp .env.example .env.local
+ Configure environment
+ cp .env.example .env.local
 
-Start development server
-npm run dev
+ Start development server
+ npm run dev
 
-Frontend will be available at `http://localhost:5173`
+ Frontend will be available at `http://localhost:5173`
 --------------------------------------------------------------------------------------#########################################################----------------------------------------------------------------------
 
 Deploy Frontend to Vercel
