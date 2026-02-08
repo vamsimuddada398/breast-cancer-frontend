@@ -1,9 +1,9 @@
-import React, { useRef, useState, useCallback } from 'react'
+import React, { useRef } from "react";
 
 interface ImageUploaderProps {
-  onUpload: (file: File) => void
-  loading: boolean
-  imagePreview: string | null
+  onUpload: (file: File) => void;
+  loading: boolean;
+  imagePreview: string | null;
 }
 
 export default function ImageUploader({
@@ -11,254 +11,149 @@ export default function ImageUploader({
   loading,
   imagePreview,
 }: ImageUploaderProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const imageRef = useRef<HTMLImageElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  // Zoom and pan state
-  const [zoom, setZoom] = useState(1)
-  const [pan, setPan] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [showZoomedView, setShowZoomedView] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      alert('Please select a valid image file')
-      return
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file (JPEG or PNG)");
+      return;
     }
-
-    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert('File size must be less than 10MB')
-      return
+      alert("File size must be less than 10MB");
+      return;
     }
 
-    // Reset zoom and pan when new image is uploaded
-    setZoom(1)
-    setPan({ x: 0, y: 0 })
-    setShowZoomedView(false)
-
-    onUpload(file)
-  }
+    onUpload(file);
+  };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    const file = e.dataTransfer.files?.[0]
-    if (!file) return
-
-    if (!file.type.startsWith('image/')) {
-      alert('Please drop a valid image file')
-      return
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Please drop a valid image file (JPEG or PNG)");
+      return;
     }
-
-    // Reset zoom and pan when new image is uploaded
-    setZoom(1)
-    setPan({ x: 0, y: 0 })
-    setShowZoomedView(false)
-
-    onUpload(file)
-  }
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File size must be less than 10MB");
+      return;
+    }
+    onUpload(file);
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
-  // Zoom controls
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev * 1.2, 5))
-  }
-
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev / 1.2, 0.5))
-  }
-
-  const handleResetZoom = () => {
-    setZoom(1)
-    setPan({ x: 0, y: 0 })
-  }
-
-  // Mouse wheel zoom
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault()
-    const delta = e.deltaY > 0 ? 0.9 : 1.1
-    setZoom(prev => Math.max(0.5, Math.min(5, prev * delta)))
-  }, [])
-
-  // Pan functionality
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (zoom > 1) {
-      setIsDragging(true)
-      setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y })
+  const handleClick = () => {
+    if (!loading && !imagePreview) {
+      fileInputRef.current?.click();
     }
-  }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && zoom > 1) {
-      setPan({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      })
-    }
-  }
-
-  const handleMouseUp = () => {
-    setIsDragging(false)
-  }
-
-  const toggleZoomedView = () => {
-    setShowZoomedView(!showZoomedView)
-    if (!showZoomedView) {
-      // Reset to fit when opening zoomed view
-      setZoom(1)
-      setPan({ x: 0, y: 0 })
-    }
-  }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Upload Area */}
-      <div
-        ref={containerRef}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        className="relative border-2 border-dashed border-slate-600 rounded-xl p-6 text-center hover:border-blue-500 transition-all duration-200 cursor-pointer bg-slate-700/20 hover:bg-slate-700/30 mx-auto max-w-lg"
-        onClick={() => !imagePreview && fileInputRef.current?.click()}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          disabled={loading}
-          className="hidden"
-        />
-
-        {imagePreview ? (
-          <div className="space-y-4">
-            {/* Image Display with Zoom/Pan */}
-            <div
-              className="relative overflow-hidden rounded-lg bg-slate-800 border border-slate-600 mx-auto"
-              style={{ 
-                height: showZoomedView ? '350px' : '280px',
-                maxWidth: showZoomedView ? '100%' : '350px'
-              }}
-              onWheel={handleWheel}
+    <div className="flex flex-col h-full">
+      <input
+        id="mammogram-upload"
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/jpg"
+        onChange={handleFileSelect}
+        disabled={loading}
+        className="hidden"
+      />
+      {imagePreview ? (
+        <div className="space-y-4">
+          <div className="relative rounded-xl overflow-hidden bg-gray-50 border border-gray-100 aspect-[4/3] max-h-[320px]">
+            <img
+              src={imagePreview}
+              alt="Uploaded mammogram"
+              className="w-full h-full object-contain"
+            />
+            {loading && (
+              <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2" />
+                  <p className="text-gray-600 text-sm font-medium">Processing…</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+              className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
             >
-              <img
-                ref={imageRef}
-                src={imagePreview}
-                alt="Uploaded mammogram"
-                className={`w-full h-full object-contain transition-transform duration-200 cursor-${zoom > 1 ? 'grab' : 'default'} ${isDragging ? 'cursor-grabbing' : ''}`}
-                style={{
-                  transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-                  transformOrigin: 'center center',
-                  maxWidth: '100%',
-                  maxHeight: '100%'
-                }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                draggable={false}
-              />
+              Choose another file
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div
+          onClick={handleClick}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          className={`
+            relative flex flex-col items-center justify-center rounded-xl
+            border-2 border-dashed transition-all duration-200 cursor-pointer
+            min-h-[320px] p-8
+            ${
+              loading
+                ? "border-gray-200 bg-gray-50 cursor-not-allowed"
+                : "border-sky-200 bg-sky-50/30 hover:border-sky-300 hover:bg-sky-50/50"
+            }
+          `}
+        >
+          {/* Choose file button - top left */}
+          <div
+            className="absolute top-4 left-4 flex items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <label
+              htmlFor="mammogram-upload"
+              className="cursor-pointer"
+            >
+              <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 shadow-sm">
+                Choose file
+              </span>
+            </label>
+            <span className="ml-2 text-sm text-gray-400">No file chosen</span>
+          </div>
 
-              {/* Zoom Controls Overlay */}
-              {imagePreview && (
-                <div className="absolute top-4 right-4 flex flex-col gap-2">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}
-                    className="w-8 h-8 bg-slate-800/80 hover:bg-slate-700/80 rounded-full flex items-center justify-center text-white transition-colors"
-                    title="Zoom In"
-                  >
-                    <span className="text-lg">+</span>
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}
-                    className="w-8 h-8 bg-slate-800/80 hover:bg-slate-700/80 rounded-full flex items-center justify-center text-white transition-colors"
-                    title="Zoom Out"
-                  >
-                    <span className="text-lg">−</span>
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleResetZoom(); }}
-                    className="w-8 h-8 bg-slate-800/80 hover:bg-slate-700/80 rounded-full flex items-center justify-center text-white transition-colors"
-                    title="Reset Zoom"
-                  >
-                    <span className="text-sm">⭯</span>
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); toggleZoomedView(); }}
-                    className="w-8 h-8 bg-blue-600/80 hover:bg-blue-500/80 rounded-full flex items-center justify-center text-white transition-colors"
-                    title={showZoomedView ? "Minimize View" : "Maximize View"}
-                  >
-                    <span className="text-sm">{showZoomedView ? '⤢' : '⤡'}</span>
-                  </button>
-                </div>
-              )}
-
-              {/* Zoom Level Indicator */}
-              {zoom !== 1 && (
-                <div className="absolute bottom-4 left-4 bg-slate-800/80 rounded-lg px-3 py-1 text-white text-sm">
-                  {Math.round(zoom * 100)}%
-                </div>
-              )}
+          {/* Large folder icon */}
+          <div className="flex flex-col items-center justify-center flex-1">
+            <div className="w-24 h-24 mb-4 flex items-center justify-center">
+              <svg
+                viewBox="0 0 24 24"
+                className="w-full h-full text-amber-400 drop-shadow-sm"
+                fill="currentColor"
+              >
+                <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z" />
+              </svg>
             </div>
+            <p className="text-gray-700 font-medium text-lg mb-2">
+              Click or Drag image to upload
+            </p>
+            <p className="text-sky-600 text-sm">JPEG / PNG • Max 10MB</p>
+          </div>
 
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-400">
-                {zoom > 1 ? 'Drag to pan • Scroll to zoom' : 'Click to replace or drag and drop'}
-              </p>
-              <div className="text-xs text-slate-500">
-                Zoom: {Math.round(zoom * 100)}%
+          {loading && (
+            <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl">
+              <div className="text-center">
+                <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-gray-600 text-sm font-medium">Processing…</p>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="text-6xl">📁</div>
-            <div>
-              <p className="text-white font-semibold text-xl mb-2">
-                Drag & drop your mammogram
-              </p>
-              <p className="text-slate-400 text-sm mb-4">
-                or click to select an image
-              </p>
-              <p className="text-xs text-slate-500">
-                Supported: JPEG, PNG, DICOM (max 10MB)
-              </p>
-            </div>
-          </div>
-        )}
-
-        {loading && (
-          <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm rounded-xl flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-white font-medium">Uploading...</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Upload Instructions */}
-      <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600 mx-auto max-w-lg">
-        <h3 className="font-semibold text-white mb-3 text-center">Guidelines</h3>
-        <ul className="space-y-2 text-sm text-slate-300">
-          <li>✓ Use high-quality mammogram images</li>
-          <li>✓ Ensure proper image resolution (minimum 224x224)</li>
-          <li>✓ Support for grayscale and color mammograms</li>
-          <li>✓ Image is processed locally with CLAHE enhancement</li>
-          <li>✓ Zoom and pan to examine details closely</li>
-        </ul>
-      </div>
+          )}
+        </div>
+      )}
     </div>
-  )
+  );
 }
